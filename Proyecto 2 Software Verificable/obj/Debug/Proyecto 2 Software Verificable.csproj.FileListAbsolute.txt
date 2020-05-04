@@ -1,0 +1,30 @@
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.exe.config
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.exe
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.pdb
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csprojAssemblyReference.cache
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\MainWindow.g.cs
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\App.g.cs
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable_MarkupCompile.cache
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable_MarkupCompile.lref
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\MainWindow.baml
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.g.resources
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto_2_Software_Verificable.Properties.Resources.resources
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csproj.GenerateResource.cache
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csproj.CoreCompileInputs.cache
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.exe
+C:\Users\ignap\source\repos\Proyecto 2 Software Verificable\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.pdb
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.exe.config
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.exe
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\bin\Debug\Proyecto 2 Software Verificable.pdb
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csprojAssemblyReference.cache
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\MainWindow.g.cs
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\App.g.cs
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable_MarkupCompile.cache
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable_MarkupCompile.lref
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\MainWindow.baml
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.g.resources
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto_2_Software_Verificable.Properties.Resources.resources
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csproj.GenerateResource.cache
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.csproj.CoreCompileInputs.cache
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.exe
+C:\Users\ignap\Desktop\proyecto parte 2\calendar-part-2-ibparrague\Proyecto 2 Software Verificable\obj\Debug\Proyecto 2 Software Verificable.pdb
