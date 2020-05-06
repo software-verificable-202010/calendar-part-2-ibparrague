@@ -355,7 +355,7 @@ namespace Proyecto_2_Software_Verificable
                 gridDayHoursNumbers.Children.Add(rectangle);
 
 
-                Label label = new Label
+                Label titleLabel = new Label
                 {
                     Margin = new Thickness(0, topMargin, 0, bottomMargin),
                     FontSize = 20,
@@ -366,22 +366,45 @@ namespace Proyecto_2_Software_Verificable
                 string labelContent = "";
                 int maxHorizontalCharacterForLabelTitle = 14;
                 int index = 0;
+                int titleTextLines = 1;
                 while (index < titleForLabel.Length)
                 {
                     labelContent += validAppointment.title[index];
                     if (index % maxHorizontalCharacterForLabelTitle == 0 && index > 1)
                     {
                         labelContent += "\n";
+                        titleTextLines += 1;
                     }
                     index++;
                 }
-                label.Content = labelContent;
-                
+                titleLabel.Content = labelContent;
+                Grid.SetColumn(titleLabel, xCoordinateToInsert + weekGridOffset);
+                Grid.SetRowSpan(titleLabel, hoursInADay);
+                gridDayHoursNumbers.Children.Add(titleLabel);
+                int titleFontLinePixels = 25;
+                Label descriptionLabel = new Label
+                {
+                    Margin = new Thickness(0, topMargin+(titleFontLinePixels * titleTextLines), 0, bottomMargin),
+                    FontSize = 10,
+                    Content = "",
+                };
 
-
-                Grid.SetColumn(label, xCoordinateToInsert + weekGridOffset);
-                Grid.SetRowSpan(label, hoursInADay);
-                gridDayHoursNumbers.Children.Add(label);
+                string desciptionForLabel = validAppointment.description;
+                labelContent = "";
+                index = 0;
+                while (index < desciptionForLabel.Length)
+                {
+                    labelContent += validAppointment.description[index];
+                    if (index % maxHorizontalCharacterForLabelTitle == 0 && index > 1)
+                    {
+                        labelContent += "\n";
+                    }
+                    index++;
+                }
+                descriptionLabel.Content = labelContent;
+                Grid.SetColumn(descriptionLabel, xCoordinateToInsert + weekGridOffset);
+                Grid.SetRowSpan(descriptionLabel, hoursInADay);
+                gridDayHoursNumbers.Children.Add(descriptionLabel);
             }
         }
         private void FillGridWeeklyDaysLabels(DateTime dateOfReference)
