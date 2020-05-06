@@ -44,6 +44,11 @@ namespace Proyecto_2_Software_Verificable
             UpdateCalendarGrid(activeMonthDate);
             this.KeyDown += new KeyEventHandler(ReadArrowInput);            
         }
+        private Color GenerateRandomColor(Random randomizer)
+        {
+            Color randomColor = Color.FromRgb((byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255));
+            return randomColor;
+        }
         public Rectangle CustomRectangle(string rectangleType)
         {
             Rectangle rectangle;
@@ -70,6 +75,38 @@ namespace Proyecto_2_Software_Verificable
                 rectangle = new Rectangle();
             }
             return rectangle;
+        }
+        private DateTime GetFirstDayOfWeek(DateTime dateOfReference)
+        {
+            string dayOfWeekOfReferenceDate = dateOfReference.DayOfWeek.ToString();
+            DateTime firstDayOfWeek;
+            int daysToSubtractToGetFirstDayOfWeek = 0;
+            switch (dayOfWeekOfReferenceDate)
+            {
+                case "Monday":
+                    daysToSubtractToGetFirstDayOfWeek = 0;
+                    break;
+                case "Tuesday":
+                    daysToSubtractToGetFirstDayOfWeek = 1;
+                    break;
+                case "Wednesday":
+                    daysToSubtractToGetFirstDayOfWeek = 2;
+                    break;
+                case "Thursday":
+                    daysToSubtractToGetFirstDayOfWeek = 3;
+                    break;
+                case "Friday":
+                    daysToSubtractToGetFirstDayOfWeek = 4;
+                    break;
+                case "Saturday":
+                    daysToSubtractToGetFirstDayOfWeek = 5;
+                    break;
+                case "Sunday":
+                    daysToSubtractToGetFirstDayOfWeek = 6;
+                    break;
+            }
+            firstDayOfWeek = dateOfReference.AddDays(-daysToSubtractToGetFirstDayOfWeek);
+            return firstDayOfWeek;
         }
         private bool CheckifAppointmentIsValid()
         {
@@ -126,19 +163,26 @@ namespace Proyecto_2_Software_Verificable
                 y_coordinate++;
             }
         }
-        private void RectangleDayBorder_MouseDown(object sender, MouseButtonEventArgs e)
+        private void DisplayMonthMenu()
         {
-            Rectangle rectangle = e.Source as Rectangle;
-            if (gridCalendar.Children.Contains(rectangle))
-            {
-                int index = Grid.GetRow(rectangle);
-                int weekRowClicked = index;
-                DateTime firstDayOfMonth = activeMonthDate.Date.AddDays(1-DateTime.Now.Day);
-                int daysInAWeek = 7;
-                activeWeekDate = firstDayOfMonth.AddDays(daysInAWeek * weekRowClicked);
-                UpdateCalendarWeekGrid();
-                DisplayWeeklyViewMenu();
-            }    
+            gridMonthlyView.Visibility = Visibility.Visible;
+            gridWeeklyView.Visibility = Visibility.Hidden;
+            gridAppointmentCreation.Visibility = Visibility.Hidden;
+            isArrowInputAvailable = true;
+        }
+        private void DisplayNewAppointmentMenu()
+        {
+            gridMonthlyView.Visibility = Visibility.Hidden;
+            gridWeeklyView.Visibility = Visibility.Hidden;
+            gridAppointmentCreation.Visibility = Visibility.Visible;
+            isArrowInputAvailable = false;
+        }
+        private void DisplayWeeklyViewMenu()
+        {
+            gridMonthlyView.Visibility = Visibility.Hidden;
+            gridWeeklyView.Visibility = Visibility.Visible;
+            gridAppointmentCreation.Visibility = Visibility.Hidden;
+            isArrowInputAvailable = false;
         }
         public void FillGridCalendar(Grid gridCalendar, DateTime dateWithinAMonth)
         {
@@ -252,184 +296,6 @@ namespace Proyecto_2_Software_Verificable
                 numberOfDay++;
             }
         }
-        private List<Appointment> SelectDayAppointments(DateTime day)
-        {
-            DateTime dayHourZero = day.Date;
-            DateTime nextDay = dayHourZero.AddDays(1);
-            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(dayHourZero, nextDay));
-            return validAppointments;
-
-        }
-        private void FillGridWeeklyDaysLabels(DateTime dateOfReference)
-        {
-            DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
-            const int numberDaysOfWeek = 7;
-            for (int xCoordinateOfWeek = 0; xCoordinateOfWeek < numberDaysOfWeek; xCoordinateOfWeek++)
-            {
-                string labelContent = "";
-                switch (xCoordinateOfWeek)
-                {
-                    case MondayPosition:
-                        labelContent = "MON ";
-                        break;
-                    case TuesdayPosition:
-                        labelContent = "TUE ";
-                        break;
-                    case WendesdayPosition:
-                        labelContent = "WED ";
-                        break;
-                    case ThursdayPosition:
-                        labelContent = "THU ";
-                        break;
-                    case FridayPosition:
-                        labelContent = "FRI ";
-                        break;
-                    case SaturdayPosition:
-                        labelContent = "SAT ";
-                        break;
-                    case SundayPosition:
-                        labelContent = "SUN ";
-                        break;
-                }
-                labelContent += mondayDate.AddDays(xCoordinateOfWeek).Day.ToString();
-                Label dayLabel = new Label
-                {
-                    Content = labelContent,
-                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 35,
-                };
-                int xCoordinateColumnOffset = 1;
-                Grid.SetColumn(dayLabel, xCoordinateOfWeek + xCoordinateColumnOffset);
-                gridWeeklyDays.Children.Add(dayLabel);
-            }
-        }
-        public void FillGridWeekHours(Grid grid)
-        {
-            int gridXCoordinate = 0;
-            for (int index = 0; index < 24; index++)
-            {
-                int gridYCoordinate = index;
-                Label labelHour = new Label()
-                {
-                    FontSize = 20,
-                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                };
-                labelHour.Content = index.ToString() + ":00";
-                Grid.SetColumn(labelHour, gridXCoordinate);
-                Grid.SetRow(labelHour, gridYCoordinate);
-                grid.Children.Add(labelHour);
-            }
-        }
-        private DateTime GetFirstDayOfWeek(DateTime dateOfReference)
-        {
-            string dayOfWeekOfReferenceDate = dateOfReference.DayOfWeek.ToString();
-            DateTime firstDayOfWeek;
-            int daysToSubtractToGetFirstDayOfWeek = 0;
-            switch (dayOfWeekOfReferenceDate)
-            {
-                case "Monday":
-                    daysToSubtractToGetFirstDayOfWeek = 0;
-                    break;
-                case "Tuesday":
-                    daysToSubtractToGetFirstDayOfWeek = 1;
-                    break;
-                case "Wednesday":
-                    daysToSubtractToGetFirstDayOfWeek = 2;
-                    break;
-                case "Thursday":
-                    daysToSubtractToGetFirstDayOfWeek = 3;
-                    break;
-                case "Friday":
-                    daysToSubtractToGetFirstDayOfWeek = 4;
-                    break;
-                case "Saturday":
-                    daysToSubtractToGetFirstDayOfWeek = 5;
-                    break;
-                case "Sunday":
-                    daysToSubtractToGetFirstDayOfWeek = 6;
-                    break;
-            }
-            firstDayOfWeek = dateOfReference.AddDays(-daysToSubtractToGetFirstDayOfWeek);
-            return firstDayOfWeek;
-        }
-        private void DisplayMonthMenu()
-        {
-            gridMonthlyView.Visibility = Visibility.Visible;
-            gridWeeklyView.Visibility = Visibility.Hidden;
-            gridAppointmentCreation.Visibility = Visibility.Hidden;
-            isArrowInputAvailable = true;
-        }
-        private void DisplayNewAppointmentMenu()
-        {
-            gridMonthlyView.Visibility = Visibility.Hidden;
-            gridWeeklyView.Visibility = Visibility.Hidden;
-            gridAppointmentCreation.Visibility = Visibility.Visible;
-            isArrowInputAvailable = false;
-        }
-        private void DisplayWeeklyViewMenu()
-        {
-            gridMonthlyView.Visibility = Visibility.Hidden;
-            gridWeeklyView.Visibility = Visibility.Visible;
-            gridAppointmentCreation.Visibility = Visibility.Hidden;
-            isArrowInputAvailable = false;
-        }
-        void ReadArrowInput(object sender, KeyEventArgs e)
-        {
-            if (isArrowInputAvailable)
-            {
-                switch (e.Key)
-                {
-                    case Key.Right:
-                        activeMonthDate = activeMonthDate.AddMonths(1);
-                        UpdateCalendarGrid(activeMonthDate);
-                        break;
-                    case Key.Left:
-                        activeMonthDate = activeMonthDate.AddMonths(-1);
-                        UpdateCalendarGrid(activeMonthDate);
-                        break;
-                    case Key.Up:
-                        activeMonthDate = activeMonthDate.AddYears(1);
-                        UpdateCalendarGrid(activeMonthDate);
-                        break;
-                    case Key.Down:
-                        activeMonthDate = activeMonthDate.AddYears(-1);
-                        UpdateCalendarGrid(activeMonthDate);
-                        break;
-                }
-            }
-        }
-        private void SaveNewAppointment()
-        {
-            string newAppointmentTitle = txtTitleNewAppointment.Text;
-            string newAppointmentDescription = txtDecriptionNewAppointment.Text;
-            DateTime newAppointmentDate = datePickerNewAppointment.SelectedDate.Value.Date;
-            DateTime newAppointmentStartTime = timePickerStartTimeNewAppointment.Value.Value;
-            DateTime newAppointmentEndTime = timePickerEndTimeNewAppointment.Value.Value;
-            Appointment appointment = new Appointment(newAppointmentTitle, newAppointmentDescription,
-                newAppointmentDate, newAppointmentStartTime, newAppointmentEndTime);
-            appointments.Add(appointment);
-        }        
-        public void UpdateCalendarGrid(DateTime dateOfReference)
-        {
-            gridCalendar.Children.Clear();
-            UpdateMonthYearLabel(dateOfReference);
-            FillGridCalendar(gridCalendar, dateOfReference);
-            CreateClickableGridBorders(gridCalendar, "blueLines");
-        }
-        private void UpdateCalendarWeekGrid()
-        {
-            ClearWeekGrids();
-            UpdateWeekMonthLabel(activeWeekDate);
-            FillGridWeeklyDaysLabels(activeWeekDate);
-            FillGridWeekHours(gridDayHoursNumbers);
-            FillGridWeekAppointments(activeWeekDate);
-            CreateClickableGridBorders(gridDayHoursNumbers, "grayLines");
-        }
-
         private void FillGridWeekAppointments(DateTime dateOfReference)
         {
             DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
@@ -518,7 +384,144 @@ namespace Proyecto_2_Software_Verificable
                 gridDayHoursNumbers.Children.Add(label);
             }
         }
+        private void FillGridWeeklyDaysLabels(DateTime dateOfReference)
+        {
+            DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
+            const int numberDaysOfWeek = 7;
+            for (int xCoordinateOfWeek = 0; xCoordinateOfWeek < numberDaysOfWeek; xCoordinateOfWeek++)
+            {
+                string labelContent = "";
+                switch (xCoordinateOfWeek)
+                {
+                    case MondayPosition:
+                        labelContent = "MON ";
+                        break;
+                    case TuesdayPosition:
+                        labelContent = "TUE ";
+                        break;
+                    case WendesdayPosition:
+                        labelContent = "WED ";
+                        break;
+                    case ThursdayPosition:
+                        labelContent = "THU ";
+                        break;
+                    case FridayPosition:
+                        labelContent = "FRI ";
+                        break;
+                    case SaturdayPosition:
+                        labelContent = "SAT ";
+                        break;
+                    case SundayPosition:
+                        labelContent = "SUN ";
+                        break;
+                }
+                labelContent += mondayDate.AddDays(xCoordinateOfWeek).Day.ToString();
+                Label dayLabel = new Label
+                {
+                    Content = labelContent,
+                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 35,
+                };
+                int xCoordinateColumnOffset = 1;
+                Grid.SetColumn(dayLabel, xCoordinateOfWeek + xCoordinateColumnOffset);
+                gridWeeklyDays.Children.Add(dayLabel);
+            }
+        }
+        public void FillGridWeekHours(Grid grid)
+        {
+            int gridXCoordinate = 0;
+            for (int index = 0; index < 24; index++)
+            {
+                int gridYCoordinate = index;
+                Label labelHour = new Label()
+                {
+                    FontSize = 20,
+                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                labelHour.Content = index.ToString() + ":00";
+                Grid.SetColumn(labelHour, gridXCoordinate);
+                Grid.SetRow(labelHour, gridYCoordinate);
+                grid.Children.Add(labelHour);
+            }
+        }
+        private void RectangleDayBorder_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Rectangle rectangle = e.Source as Rectangle;
+            if (gridCalendar.Children.Contains(rectangle))
+            {
+                int index = Grid.GetRow(rectangle);
+                int weekRowClicked = index;
+                DateTime firstDayOfMonth = activeMonthDate.Date.AddDays(1-DateTime.Now.Day);
+                int daysInAWeek = 7;
+                activeWeekDate = firstDayOfMonth.AddDays(daysInAWeek * weekRowClicked);
+                UpdateCalendarWeekGrid();
+                DisplayWeeklyViewMenu();
+            }    
+        }
+        void ReadArrowInput(object sender, KeyEventArgs e)
+        {
+            if (isArrowInputAvailable)
+            {
+                switch (e.Key)
+                {
+                    case Key.Right:
+                        activeMonthDate = activeMonthDate.AddMonths(1);
+                        UpdateCalendarGrid(activeMonthDate);
+                        break;
+                    case Key.Left:
+                        activeMonthDate = activeMonthDate.AddMonths(-1);
+                        UpdateCalendarGrid(activeMonthDate);
+                        break;
+                    case Key.Up:
+                        activeMonthDate = activeMonthDate.AddYears(1);
+                        UpdateCalendarGrid(activeMonthDate);
+                        break;
+                    case Key.Down:
+                        activeMonthDate = activeMonthDate.AddYears(-1);
+                        UpdateCalendarGrid(activeMonthDate);
+                        break;
+                }
+            }
+        }
+        private void SaveNewAppointment()
+        {
+            string newAppointmentTitle = txtTitleNewAppointment.Text;
+            string newAppointmentDescription = txtDecriptionNewAppointment.Text;
+            DateTime newAppointmentDate = datePickerNewAppointment.SelectedDate.Value.Date;
+            DateTime newAppointmentStartTime = timePickerStartTimeNewAppointment.Value.Value;
+            DateTime newAppointmentEndTime = timePickerEndTimeNewAppointment.Value.Value;
+            Appointment appointment = new Appointment(newAppointmentTitle, newAppointmentDescription,
+                newAppointmentDate, newAppointmentStartTime, newAppointmentEndTime);
+            appointments.Add(appointment);
+        }        
+        private List<Appointment> SelectDayAppointments(DateTime day)
+        {
+            DateTime dayHourZero = day.Date;
+            DateTime nextDay = dayHourZero.AddDays(1);
+            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(dayHourZero, nextDay));
+            return validAppointments;
 
+        }
+        public void UpdateCalendarGrid(DateTime dateOfReference)
+        {
+            gridCalendar.Children.Clear();
+            UpdateMonthYearLabel(dateOfReference);
+            FillGridCalendar(gridCalendar, dateOfReference);
+            CreateClickableGridBorders(gridCalendar, "blueLines");
+        }
+        private void UpdateCalendarWeekGrid()
+        {
+            ClearWeekGrids();
+            UpdateWeekMonthLabel(activeWeekDate);
+            FillGridWeeklyDaysLabels(activeWeekDate);
+            FillGridWeekHours(gridDayHoursNumbers);
+            FillGridWeekAppointments(activeWeekDate);
+            CreateClickableGridBorders(gridDayHoursNumbers, "grayLines");
+        }
         public void UpdateMonthYearLabel(DateTime date)
         {
             CultureInfo usEnglish = new CultureInfo("en-US");
@@ -538,13 +541,6 @@ namespace Proyecto_2_Software_Verificable
             }
             
         }
-        
-        private Color GenerateRandomColor(Random randomizer)
-        {
-            Color randomColor = Color.FromRgb((byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255));
-            return randomColor;
-        }
-        
         private void btnGoBackToMonth_Click(object sender, RoutedEventArgs e)
         {
             DisplayMonthMenu();
@@ -563,6 +559,7 @@ namespace Proyecto_2_Software_Verificable
             if (CheckifAppointmentIsValid())
             {
                 SaveNewAppointment();
+                UpdateCalendarWeekGrid();
                 DisplayWeeklyViewMenu();
                 SerializeAppointments(appointments);
             }
