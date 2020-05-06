@@ -3,11 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:Proyecto_2_Software_Verificable"
         mc:Ignorable="d"
         Title="Calendar" Height="720" Width="1280" ResizeMode="NoResize">
     <Grid>
-        <Grid Name="gridMonthlyView" Visibility="Hidden">
+        <Grid Name="gridMonthlyView" Visibility="Visible">
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="1*" />
@@ -65,14 +66,25 @@
                 </Grid.RowDefinitions>
             </Grid>
         </Grid>
-        <Grid x:Name="gridWeeklyView">
+        <Grid x:Name="gridWeeklyView" Visibility="Hidden">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
             <Grid x:Name="gridWeeklyHeader" Grid.Row="0">
-                <Label Name="lblWeekMonth" Content="TESTMESSAGE" FontSize="40" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Button Name="btnGoBackToMonth" FontSize="25" Content="Back" Click="btnGoBackToMonth_Click"></Button>
+                <Label Name="lblWeekMonth" Content="TESTMESSAGE" Grid.Column="3" FontSize="40" VerticalAlignment="Center" HorizontalAlignment="Center"></Label>
+                <Button x:Name="btnPreviousWeek" Grid.Column="1" Grid.ColumnSpan="1" FontFamily="Marlett" FontSize="40" Content="3" Click="btnPreviousWeek_Click"/>
+                <Button x:Name="btnNextWeek" Grid.Column="2" HorizontalAlignment="Left" Width="48" FontFamily="Marlett" FontSize="40" Content="4" Click="btnNextWeek_Click"/>
+                <Button x:Name="btnNewAppointment" Grid.Column="4" Content="New Appointment" FontSize="16" Click="btnNewAppointment_Click" Grid.ColumnSpan="2" HorizontalAlignment="Right"></Button>
             </Grid>
             <Grid x:Name="gridWeeklyDays" Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -85,6 +97,7 @@
                     <ColumnDefinition Width="2*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
+
             </Grid>
             <Grid Grid.Row="2">
                 <ScrollViewer>
@@ -128,6 +141,38 @@
                     </Grid>
                 </ScrollViewer>
             </Grid>
+        </Grid>
+        <Grid x:Name="gridAppointmentCreation" Visibility="Hidden" Background="LightGray">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="lblAppointmentCreation" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="60" Grid.Column="1" Grid.ColumnSpan="3" Content="New Appointment"></Label>
+            <Label FontSize="40" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Content="Title:"></Label>
+            <Label FontSize="40" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Content="Description:"></Label>
+            <Label FontSize="40" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="3" Content="Date:"></Label>
+            <Label FontSize="40" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="4" Content="Start Time:"></Label>
+            <Label FontSize="40" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="0" Grid.Row="5" Content="End Time:"></Label>
+            <TextBox x:Name="txtTitleNewAppointment" TextWrapping="Wrap" FontSize="20" Margin="0,20" Grid.ColumnSpan="2" Grid.Row="1" Grid.Column="1"></TextBox>
+            <TextBox x:Name="txtDecriptionNewAppointment" TextWrapping="Wrap" FontSize="20" Margin="0,20" Grid.ColumnSpan="2" Grid.Row="2" Grid.Column="1"></TextBox>
+            <DatePicker Name="datePickerNewAppointment" FontSize="30" VerticalAlignment="Center" Grid.ColumnSpan="1" Grid.Column="1" Grid.Row="3" />
+            <xctk:TimePicker x:Name="timePickerStartTimeNewAppointment" Margin="0,20" FontSize="20" Grid.Column="1" Grid.Row="4"></xctk:TimePicker>
+            <xctk:TimePicker x:Name="timePickerEndTimeNewAppointment" Margin="0,20" FontSize="20" Grid.Column="1" Grid.Row="5"></xctk:TimePicker>
+            <Button x:Name="btnCancelNewAppointment" Grid.Column="0" Grid.Row="6" Content="Cancel" FontSize="25" Click="btnCancelNewAppointment_Click"></Button>
+            <Label Name="lblErrorsNewAppointment" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="3" FontSize="20"></Label>
+            <Button x:Name="btnSaveNewAppointment" Grid.Column="5" Grid.Row="6" Content="Save" FontSize="25" Click="btnSaveNewAppointment_Click"></Button>
         </Grid>
     </Grid>
 </Window>

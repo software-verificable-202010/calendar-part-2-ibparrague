@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +16,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
+using Xceed.Wpf.Toolkit;
 
 namespace Proyecto_2_Software_Verificable
 {
@@ -21,8 +26,10 @@ namespace Proyecto_2_Software_Verificable
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool isButtonsAvailable = false;
-        DateTime activeDate = DateTime.Now;
+        bool isArrowInputAvailable = true;
+        DateTime activeMonthDate = DateTime.Now;
+        DateTime activeWeekDate = DateTime.Now;
+        List<Appointment> appointments = new List<Appointment>();
         const int MondayPosition = 0;
         const int TuesdayPosition = 1;
         const int WendesdayPosition = 2;
@@ -33,135 +40,105 @@ namespace Proyecto_2_Software_Verificable
         public MainWindow()
         {
             InitializeComponent();
-            UpdateCalendarGrid(activeDate);
-            this.KeyDown += new KeyEventHandler(ReadArrowInput);
-            UpdateCalendarWeekGrid();
+            appointments = DeserializeAppointments();
+            UpdateCalendarGrid(activeMonthDate);
+            this.KeyDown += new KeyEventHandler(ReadArrowInput);            
         }
-
-        private void UpdateCalendarWeekGrid()
+        public Rectangle CustomRectangle(string rectangleType)
         {
-            ClearWeekGrids();
-            UpdateWeekMonthLabel(DateTime.Now); //TODO: RECIBIR FECHA DINAMICAMENTE
-            CreateGoBackToMonthButton();
-            FillgridWeeklyDaysLabels(DateTime.Now); //TODO: RECIBIR FECHA DINAMICAMENTE
-            FillGridWeekHours(gridDayHoursNumbers);
-            ColourGridBorders(gridDayHoursNumbers, "grayLines");
-        }
-        private void CreateGoBackToMonthButton()
-        {
-            Button goBackToMonthButton = new Button
+            Rectangle rectangle;
+            if (rectangleType == "blueLines")
             {
-                FontSize = 30,
-                Content = "Back"
-            };
-            goBackToMonthButton.Click += GoBackToMonthButton_Click;
-            gridWeeklyDays.Children.Add(goBackToMonthButton);
+                rectangle = new Rectangle()
+                {
+                    Fill = Brushes.Transparent,
+                    Stroke = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1f3861")),
+                    StrokeThickness = 2
+                };
+            }
+            else if (rectangleType == "grayLines")
+            {
+                rectangle = new Rectangle()
+                {
+                    Fill = Brushes.Transparent,
+                    Stroke = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
+                    StrokeThickness = 0.5
+                };
+            }
+            else
+            {
+                rectangle = new Rectangle();
+            }
+            return rectangle;
         }
-        private void GoBackToMonthButton_Click(object sender, RoutedEventArgs e)
+        private bool CheckifAppointmentIsValid()
         {
-            gridMonthlyView.Visibility = Visibility.Visible;
-            gridWeeklyView.Visibility = Visibility.Hidden;
-            isButtonsAvailable = true;
+            bool isAppointmentTitleValid = false;
+            bool isAppointmentDescriptionValid = false;
+            bool isAppointmentDateValid = false;
+            bool isAppointmentStartHourValid = false;
+            bool isAppointmentEndHourValid = false;
+
+            if (txtTitleNewAppointment.Text.Trim(' ') != "")
+                isAppointmentTitleValid = true;
+
+            if (txtDecriptionNewAppointment.Text.Trim(' ') != "")
+                isAppointmentDescriptionValid = true;
+
+            if (datePickerNewAppointment.SelectedDate.HasValue)
+                isAppointmentDateValid = true;
+
+            if (timePickerStartTimeNewAppointment.Value != null)
+                isAppointmentStartHourValid = true;
+            if (timePickerEndTimeNewAppointment.Value != null &&
+            timePickerStartTimeNewAppointment.Value < timePickerEndTimeNewAppointment.Value)
+                isAppointmentEndHourValid = true;
+
+            if (isAppointmentTitleValid && isAppointmentDescriptionValid &&
+                isAppointmentDateValid && isAppointmentStartHourValid && isAppointmentEndHourValid)
+                return true;
+            else
+                return false;
         }
         private void ClearWeekGrids()
         {
             gridDayHoursNumbers.Children.Clear();
             gridWeeklyDays.Children.Clear();
         }
-        private void UpdateWeekMonthLabel(DateTime dateOfReference)
+        public void CreateClickableGridBorders(Grid grid, string customRectangleType)
         {
-            CultureInfo usEnglish = new CultureInfo("en-US");
-            lblWeekMonth.Content = GetFirstDayOfWeek(dateOfReference).ToString("MMMM", usEnglish).ToUpper();
-        }
-        private void FillgridWeeklyDaysLabels(DateTime dateOfReference)
-        {
-            DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
-            const int numberDaysOfWeek = 7;
-            for (int xCoordinateOfWeek = 0; xCoordinateOfWeek < numberDaysOfWeek; xCoordinateOfWeek++)
+            int columnAmount = grid.ColumnDefinitions.Count();
+            int rowAmount = grid.RowDefinitions.Count();
+            int x_coordinate;
+            int y_coordinate = 0;
+            while (y_coordinate < rowAmount)
             {
-                string labelContent = "";
-                switch (xCoordinateOfWeek)
+                x_coordinate = 0;
+                while (x_coordinate < columnAmount)
                 {
-                    case MondayPosition:
-                        labelContent = "MON ";
-                        break;
-                    case TuesdayPosition:
-                        labelContent = "TUE ";
-                        break;
-                    case WendesdayPosition:
-                        labelContent = "WED ";
-                        break;
-                    case ThursdayPosition:
-                        labelContent = "THU ";
-                        break;
-                    case FridayPosition:
-                        labelContent = "FRI ";
-                        break;
-                    case SaturdayPosition:
-                        labelContent = "SAT ";
-                        break;
-                    case SundayPosition:
-                        labelContent = "SUN ";
-                        break;
+                    Rectangle rectangleDayBorder = CustomRectangle(customRectangleType);
+                    rectangleDayBorder.MouseDown += RectangleDayBorder_MouseDown;
+                    Grid.SetColumn(rectangleDayBorder, x_coordinate);
+                    Grid.SetRow(rectangleDayBorder, y_coordinate);
+                    grid.Children.Add(rectangleDayBorder);
+                    x_coordinate++;
                 }
-                labelContent += mondayDate.AddDays(xCoordinateOfWeek).Day.ToString();
-                Label dayLabel = new Label
-                {
-                    Content = labelContent,
-                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 35,
-                };
-                int xCoordinateColumnOffset = 1;
-                Grid.SetColumn(dayLabel, xCoordinateOfWeek + xCoordinateColumnOffset);
-                gridWeeklyDays.Children.Add(dayLabel);
+                y_coordinate++;
             }
         }
-        private DateTime GetFirstDayOfWeek(DateTime dateOfReference)
+        private void RectangleDayBorder_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            string dayOfWeekOfReferenceDate = dateOfReference.DayOfWeek.ToString();
-            DateTime firstDayOfWeek;
-            int daysToSubtractToGetFirstDayOfWeek = 0;
-            switch (dayOfWeekOfReferenceDate)
+            Rectangle rectangle = e.Source as Rectangle;
+            if (gridCalendar.Children.Contains(rectangle))
             {
-                case "Monday":
-                    daysToSubtractToGetFirstDayOfWeek = 0;
-                    break;
-                case "Tuesday":
-                    daysToSubtractToGetFirstDayOfWeek = 1;
-                    break;
-                case "Wednesday":
-                    daysToSubtractToGetFirstDayOfWeek = 2;
-                    break;
-                case "Thursday":
-                    daysToSubtractToGetFirstDayOfWeek = 3;
-                    break;
-                case "Friday":
-                    daysToSubtractToGetFirstDayOfWeek = 4;
-                    break;
-                case "Saturday":
-                    daysToSubtractToGetFirstDayOfWeek = 5;
-                    break;
-                case "Sunday":
-                    daysToSubtractToGetFirstDayOfWeek = 6;
-                    break;
-            }
-            firstDayOfWeek = dateOfReference.AddDays(-daysToSubtractToGetFirstDayOfWeek);
-            return firstDayOfWeek;
-        }
-        public void UpdateCalendarGrid(DateTime dateOfReference)
-        {
-            gridCalendar.Children.Clear();
-            UpdateMonthYearLabel(dateOfReference);
-            FillGridCalendar(gridCalendar, dateOfReference);
-            ColourGridBorders(gridCalendar, "blueLines");
-        }
-        public void UpdateMonthYearLabel(DateTime date)
-        {
-            CultureInfo usEnglish = new CultureInfo("en-US");
-            lblMonth.Content = date.ToString("MMMM", usEnglish).ToUpper();
-            lblYear.Content = date.Year.ToString();
+                int index = Grid.GetRow(rectangle);
+                int weekRowClicked = index;
+                DateTime firstDayOfMonth = activeMonthDate.Date.AddDays(1-DateTime.Now.Day);
+                int daysInAWeek = 7;
+                activeWeekDate = firstDayOfMonth.AddDays(daysInAWeek * weekRowClicked);
+                UpdateCalendarWeekGrid();
+                DisplayWeeklyViewMenu();
+            }    
         }
         public void FillGridCalendar(Grid gridCalendar, DateTime dateWithinAMonth)
         {
@@ -230,11 +207,41 @@ namespace Proyecto_2_Software_Verificable
                     HorizontalAlignment = HorizontalAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Top,
                     FontSize = 25,
-                    Content = numberOfDay
+                    Content = numberOfDay,              
                 };
                 Grid.SetColumn(label, xCoordinateToInsertNumber);
                 Grid.SetRow(label, yCoordinateToInsertNumber);
                 gridCalendar.Children.Add(label);
+
+                //Adding Appointments to each day
+                DateTime dayToCheckAppointments = firstDayOfMonth.Date.AddDays(numberOfDay-1); //The -1 is given so that we count from theorical day 0 insted of 1
+                List<Appointment> dayAppointments = SelectDayAppointments(dayToCheckAppointments);
+                if (dayAppointments.Count != 0)
+                {
+                    Label appointmentLabel = new Label()
+                    {
+                        Foreground = Brushes.Black,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 15,
+                        Content = ""
+                    };
+                    foreach (Appointment appointment in dayAppointments)
+                    {
+                        if (appointmentLabel.Content.ToString() == "")
+                        {
+                            appointmentLabel.Content += appointment.title;
+                        }
+                        else
+                        {
+                            appointmentLabel.Content += "\n";
+                            appointmentLabel.Content += appointment.title;
+                        }
+                    }
+                    Grid.SetColumn(appointmentLabel, xCoordinateToInsertNumber);
+                    Grid.SetRow(appointmentLabel, yCoordinateToInsertNumber);
+                    gridCalendar.Children.Add(appointmentLabel);
+                }
 
                 //Making the login of coordinates advance
                 xCoordinateToInsertNumber++;
@@ -245,6 +252,59 @@ namespace Proyecto_2_Software_Verificable
                 }
 
                 numberOfDay++;
+            }
+        }
+        private List<Appointment> SelectDayAppointments(DateTime day)
+        {
+            DateTime dayHourZero = day.Date;
+            DateTime nextDay = dayHourZero.AddDays(1);
+            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(dayHourZero, nextDay));
+            return validAppointments;
+
+        }
+        private void FillGridWeeklyDaysLabels(DateTime dateOfReference)
+        {
+            DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
+            const int numberDaysOfWeek = 7;
+            for (int xCoordinateOfWeek = 0; xCoordinateOfWeek < numberDaysOfWeek; xCoordinateOfWeek++)
+            {
+                string labelContent = "";
+                switch (xCoordinateOfWeek)
+                {
+                    case MondayPosition:
+                        labelContent = "MON ";
+                        break;
+                    case TuesdayPosition:
+                        labelContent = "TUE ";
+                        break;
+                    case WendesdayPosition:
+                        labelContent = "WED ";
+                        break;
+                    case ThursdayPosition:
+                        labelContent = "THU ";
+                        break;
+                    case FridayPosition:
+                        labelContent = "FRI ";
+                        break;
+                    case SaturdayPosition:
+                        labelContent = "SAT ";
+                        break;
+                    case SundayPosition:
+                        labelContent = "SUN ";
+                        break;
+                }
+                labelContent += mondayDate.AddDays(xCoordinateOfWeek).Day.ToString();
+                Label dayLabel = new Label
+                {
+                    Content = labelContent,
+                    Foreground = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 35,
+                };
+                int xCoordinateColumnOffset = 1;
+                Grid.SetColumn(dayLabel, xCoordinateOfWeek + xCoordinateColumnOffset);
+                gridWeeklyDays.Children.Add(dayLabel);
             }
         }
         public void FillGridWeekHours(Grid grid)
@@ -266,88 +326,201 @@ namespace Proyecto_2_Software_Verificable
                 grid.Children.Add(labelHour);
             }
         }
-        public void ColourGridBorders(Grid grid, string customRectangleType)
+        private DateTime GetFirstDayOfWeek(DateTime dateOfReference)
         {
-            int columnAmount = grid.ColumnDefinitions.Count();
-            int rowAmount = grid.RowDefinitions.Count();
-            int x_coordinate;
-            int y_coordinate = 0;
-            while (y_coordinate < rowAmount)
+            string dayOfWeekOfReferenceDate = dateOfReference.DayOfWeek.ToString();
+            DateTime firstDayOfWeek;
+            int daysToSubtractToGetFirstDayOfWeek = 0;
+            switch (dayOfWeekOfReferenceDate)
             {
-                x_coordinate = 0;
-                while (x_coordinate < columnAmount)
-                {
-                    Rectangle rectangleDayBorder = CustomRectangle(customRectangleType);
-                    Grid.SetColumn(rectangleDayBorder, x_coordinate);
-                    Grid.SetRow(rectangleDayBorder, y_coordinate);
-                    grid.Children.Add(rectangleDayBorder);
-                    x_coordinate++;
-                }
-                y_coordinate++;
+                case "Monday":
+                    daysToSubtractToGetFirstDayOfWeek = 0;
+                    break;
+                case "Tuesday":
+                    daysToSubtractToGetFirstDayOfWeek = 1;
+                    break;
+                case "Wednesday":
+                    daysToSubtractToGetFirstDayOfWeek = 2;
+                    break;
+                case "Thursday":
+                    daysToSubtractToGetFirstDayOfWeek = 3;
+                    break;
+                case "Friday":
+                    daysToSubtractToGetFirstDayOfWeek = 4;
+                    break;
+                case "Saturday":
+                    daysToSubtractToGetFirstDayOfWeek = 5;
+                    break;
+                case "Sunday":
+                    daysToSubtractToGetFirstDayOfWeek = 6;
+                    break;
             }
+            firstDayOfWeek = dateOfReference.AddDays(-daysToSubtractToGetFirstDayOfWeek);
+            return firstDayOfWeek;
         }
-        private void btnNextDay_Click(object sender, RoutedEventArgs e)
+        private void DisplayMonthMenu()
         {
-            activeDate = activeDate.AddMonths(1);
-            UpdateCalendarGrid(activeDate);
+            gridMonthlyView.Visibility = Visibility.Visible;
+            gridWeeklyView.Visibility = Visibility.Hidden;
+            gridAppointmentCreation.Visibility = Visibility.Hidden;
+            isArrowInputAvailable = true;
         }
-        private void btnPrevDay_Click(object sender, RoutedEventArgs e)
+        private void DisplayNewAppointmentMenu()
         {
-            activeDate = activeDate.AddMonths(-1);
-            UpdateCalendarGrid(activeDate);
+            gridMonthlyView.Visibility = Visibility.Hidden;
+            gridWeeklyView.Visibility = Visibility.Hidden;
+            gridAppointmentCreation.Visibility = Visibility.Visible;
+            isArrowInputAvailable = false;
+        }
+        private void DisplayWeeklyViewMenu()
+        {
+            gridMonthlyView.Visibility = Visibility.Hidden;
+            gridWeeklyView.Visibility = Visibility.Visible;
+            gridAppointmentCreation.Visibility = Visibility.Hidden;
+            isArrowInputAvailable = false;
         }
         void ReadArrowInput(object sender, KeyEventArgs e)
         {
-            if (isButtonsAvailable)
+            if (isArrowInputAvailable)
             {
                 switch (e.Key)
                 {
                     case Key.Right:
-                        activeDate = activeDate.AddMonths(1);
-                        UpdateCalendarGrid(activeDate);
+                        activeMonthDate = activeMonthDate.AddMonths(1);
+                        UpdateCalendarGrid(activeMonthDate);
                         break;
                     case Key.Left:
-                        activeDate = activeDate.AddMonths(-1);
-                        UpdateCalendarGrid(activeDate);
+                        activeMonthDate = activeMonthDate.AddMonths(-1);
+                        UpdateCalendarGrid(activeMonthDate);
                         break;
                     case Key.Up:
-                        activeDate = activeDate.AddYears(1);
-                        UpdateCalendarGrid(activeDate);
+                        activeMonthDate = activeMonthDate.AddYears(1);
+                        UpdateCalendarGrid(activeMonthDate);
                         break;
                     case Key.Down:
-                        activeDate = activeDate.AddYears(-1);
-                        UpdateCalendarGrid(activeDate);
+                        activeMonthDate = activeMonthDate.AddYears(-1);
+                        UpdateCalendarGrid(activeMonthDate);
                         break;
                 }
             }
         }
-        public Rectangle CustomRectangle(string rectangleType)
+        private void SaveNewAppointment()
         {
-            Rectangle rectangle;
-            if (rectangleType == "blueLines")
+            string newAppointmentTitle = txtTitleNewAppointment.Text;
+            string newAppointmentDescription = txtDecriptionNewAppointment.Text;
+            DateTime newAppointmentDate = datePickerNewAppointment.SelectedDate.Value.Date;
+            DateTime newAppointmentStartTime = timePickerStartTimeNewAppointment.Value.Value;
+            DateTime newAppointmentEndTime = timePickerEndTimeNewAppointment.Value.Value;
+            Appointment appointment = new Appointment(newAppointmentTitle, newAppointmentDescription,
+                newAppointmentDate, newAppointmentStartTime, newAppointmentEndTime);
+            appointments.Add(appointment);
+        }        
+        public void UpdateCalendarGrid(DateTime dateOfReference)
+        {
+            gridCalendar.Children.Clear();
+            //AddAppointmentsToMonthView();
+            UpdateMonthYearLabel(dateOfReference);
+            FillGridCalendar(gridCalendar, dateOfReference);
+            CreateClickableGridBorders(gridCalendar, "blueLines");
+        }
+        private void UpdateCalendarWeekGrid()
+        {
+            ClearWeekGrids();
+            UpdateWeekMonthLabel(activeWeekDate);
+            FillGridWeeklyDaysLabels(activeWeekDate);
+            FillGridWeekHours(gridDayHoursNumbers);
+            CreateClickableGridBorders(gridDayHoursNumbers, "grayLines");
+        }
+        public void UpdateMonthYearLabel(DateTime date)
+        {
+            CultureInfo usEnglish = new CultureInfo("en-US");
+            lblMonth.Content = date.ToString("MMMM", usEnglish).ToUpper();
+            lblYear.Content = date.Year.ToString();
+        }
+        private void UpdateWeekMonthLabel(DateTime dateOfReference)
+        {
+            CultureInfo usEnglish = new CultureInfo("en-US");
+            string monthName = GetFirstDayOfWeek(dateOfReference).ToString("MMMM", usEnglish).ToUpper();
+            lblWeekMonth.Content = monthName;
+            int daysToLastDayOfWeek = 6;
+            string weekendMonthName = GetFirstDayOfWeek(dateOfReference).AddDays(daysToLastDayOfWeek).ToString("MMMM", usEnglish).ToUpper();
+            if (monthName != weekendMonthName)
             {
-                rectangle = new Rectangle()
-                {
-                    Fill = Brushes.Transparent,
-                    Stroke = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1f3861")),
-                    StrokeThickness = 2
-                };
+                lblWeekMonth.Content += " / " + weekendMonthName;
             }
-            else if (rectangleType == "grayLines")
+            
+        }
+        private void btnGoBackToMonth_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayMonthMenu();
+            UpdateCalendarGrid(activeMonthDate);
+        }
+        private void btnNewAppointment_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayNewAppointmentMenu();
+        }
+        private void btnCancelNewAppointment_Click(object sender, RoutedEventArgs e)
+        {
+            DisplayWeeklyViewMenu();
+        }
+        private void btnSaveNewAppointment_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckifAppointmentIsValid())
             {
-                rectangle = new Rectangle()
-                {
-                    Fill = Brushes.Transparent,
-                    Stroke = (SolidColorBrush)(new BrushConverter().ConvertFrom("#999999")),
-                    StrokeThickness = 0.5
-                };
+                SaveNewAppointment();
+                DisplayWeeklyViewMenu();
+                SerializeAppointments(appointments);
             }
             else
             {
-                rectangle = new Rectangle();
+                lblErrorsNewAppointment.Content = "Error creating appointment, check fields";
             }
-            return rectangle;
         }
-
+        private void btnNextDay_Click(object sender, RoutedEventArgs e)
+        {
+            activeMonthDate = activeMonthDate.AddMonths(1);
+            UpdateCalendarGrid(activeMonthDate);
+        }
+        private void btnPrevDay_Click(object sender, RoutedEventArgs e)
+        {
+            activeMonthDate = activeMonthDate.AddMonths(-1);
+            UpdateCalendarGrid(activeMonthDate);
+        }
+        private void btnPreviousWeek_Click(object sender, RoutedEventArgs e)
+        {
+            int daysInAWeek = 7;
+            activeWeekDate = activeWeekDate.AddDays(-daysInAWeek);
+            UpdateCalendarWeekGrid();
+        }
+        private void btnNextWeek_Click(object sender, RoutedEventArgs e)
+        {
+            int daysInAWeek = 7;
+            activeWeekDate = activeWeekDate.AddDays(daysInAWeek);
+            UpdateCalendarWeekGrid();
+        }
+        static public void SerializeAppointments(List<Appointment> appointments)
+        {
+            string path = Environment.CurrentDirectory + "\\SeriaizedAppointments.txt";
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write);
+            formatter.Serialize(stream, appointments);
+            stream.Close();
+        }
+        static public List<Appointment> DeserializeAppointments()
+        {
+            IFormatter formatter = new BinaryFormatter();
+            string path = Environment.CurrentDirectory + "\\SeriaizedAppointments.txt";
+            if (File.Exists(path))
+            {
+                Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+                List<Appointment> loadedAppointments = (List<Appointment>)formatter.Deserialize(stream);
+                stream.Close();
+                return loadedAppointments;
+            }
+            else
+            {
+                return new List<Appointment>();
+            }
+        }
     }
 }
