@@ -142,8 +142,6 @@ namespace Proyecto_2_Software_Verificable
         }
         public void FillGridCalendar(Grid gridCalendar, DateTime dateWithinAMonth)
         {
-            //x Coordate of each day on calendar grid
-
             int firstDayOfMonthNumber = 1;
             DateTime firstDayOfMonth = new DateTime(dateWithinAMonth.Year, dateWithinAMonth.Month, firstDayOfMonthNumber);
             DateTime lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
@@ -418,7 +416,6 @@ namespace Proyecto_2_Software_Verificable
         public void UpdateCalendarGrid(DateTime dateOfReference)
         {
             gridCalendar.Children.Clear();
-            //AddAppointmentsToMonthView();
             UpdateMonthYearLabel(dateOfReference);
             FillGridCalendar(gridCalendar, dateOfReference);
             CreateClickableGridBorders(gridCalendar, "blueLines");
@@ -429,8 +426,99 @@ namespace Proyecto_2_Software_Verificable
             UpdateWeekMonthLabel(activeWeekDate);
             FillGridWeeklyDaysLabels(activeWeekDate);
             FillGridWeekHours(gridDayHoursNumbers);
+            FillGridWeekAppointments(activeWeekDate);
             CreateClickableGridBorders(gridDayHoursNumbers, "grayLines");
         }
+
+        private void FillGridWeekAppointments(DateTime dateOfReference)
+        {
+            DateTime mondayDate = GetFirstDayOfWeek(dateOfReference);
+            const int numberDaysOfWeek = 7;
+            DateTime sunday = mondayDate.AddDays(numberDaysOfWeek);
+            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(mondayDate, sunday));
+            Random randomizer = new Random();
+            foreach (Appointment validAppointment in validAppointments)
+            {
+                int hoursInADay = 24;
+                int minutesInADay = 1440;
+                int weekGridOffset = 1;
+                int xCoordinateToInsert = 0;
+                string dayOfWeekOfAppointment = validAppointment.date.DayOfWeek.ToString();
+                switch (dayOfWeekOfAppointment)
+                {
+                    case "Monday":
+                        xCoordinateToInsert = MondayPosition;
+                        break;
+                    case "Tuesday":
+                        xCoordinateToInsert = TuesdayPosition;
+                        break;
+                    case "Wednesday":
+                        xCoordinateToInsert = WendesdayPosition;
+                        break;
+                    case "Thursday":
+                        xCoordinateToInsert = ThursdayPosition;
+                        break;
+                    case "Friday":
+                        xCoordinateToInsert = FridayPosition;
+                        break;
+                    case "Saturday":
+                        xCoordinateToInsert = SaturdayPosition;
+                        break;
+                    case "Sunday":
+                        xCoordinateToInsert = SundayPosition;
+                        break;
+                }
+
+                double startHourInMinutes = (validAppointment.startTime - validAppointment.startTime.Date).TotalMinutes;
+                double endHourInMinutes = (validAppointment.endTime - validAppointment.endTime.Date).TotalMinutes;
+                double rectangleHeight = endHourInMinutes - startHourInMinutes;
+                double topMargin = startHourInMinutes;
+                double bottomMargin = minutesInADay - endHourInMinutes;
+                Color randomColor = GenerateRandomColor(randomizer);
+                SolidColorBrush randomColorBrush = new SolidColorBrush(randomColor);
+                Rectangle rectangle = new Rectangle
+                {
+                    Height = rectangleHeight,
+                    Margin = new Thickness(0, topMargin, 0, bottomMargin),
+                    Fill = Brushes.Transparent,
+                    StrokeThickness = 5,
+                    Stroke = randomColorBrush,
+                };
+                Grid.SetColumn(rectangle, xCoordinateToInsert + weekGridOffset);
+                Grid.SetRowSpan(rectangle, hoursInADay);
+                gridDayHoursNumbers.Children.Add(rectangle);
+
+
+                Label label = new Label
+                {
+                    Margin = new Thickness(0, topMargin, 0, bottomMargin),
+                    FontSize = 20,
+                    Content = "",
+                };
+
+                string titleForLabel = validAppointment.title;
+                string labelContent = "";
+                int maxHorizontalCharacterForLabelTitle = 14;
+                int index = 0;
+                while (index < titleForLabel.Length)
+                {
+                    labelContent += validAppointment.title[index];
+                    if (index % maxHorizontalCharacterForLabelTitle == 0 && index > 1)
+                    {
+                        labelContent += "\n";
+                    }
+                    index++;
+                }
+                label.Content = labelContent;
+                
+
+
+                Grid.SetColumn(label, xCoordinateToInsert + weekGridOffset);
+                Grid.SetRowSpan(label, hoursInADay);
+                gridDayHoursNumbers.Children.Add(label);
+            }
+        }
+
         public void UpdateMonthYearLabel(DateTime date)
         {
             CultureInfo usEnglish = new CultureInfo("en-US");
@@ -450,6 +538,13 @@ namespace Proyecto_2_Software_Verificable
             }
             
         }
+        
+        private Color GenerateRandomColor(Random randomizer)
+        {
+            Color randomColor = Color.FromRgb((byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255), (byte)randomizer.Next(0, 255));
+            return randomColor;
+        }
+        
         private void btnGoBackToMonth_Click(object sender, RoutedEventArgs e)
         {
             DisplayMonthMenu();
