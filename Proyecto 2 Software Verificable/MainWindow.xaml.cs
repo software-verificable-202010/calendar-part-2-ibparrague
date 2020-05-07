@@ -257,7 +257,7 @@ namespace Proyecto_2_Software_Verificable
 
                 //Adding Appointments to each day
                 DateTime dayToCheckAppointments = firstDayOfMonth.Date.AddDays(numberOfDay-1); //The -1 is given so that we count from theorical day 0 insted of 1
-                List<Appointment> dayAppointments = SelectDayAppointments(dayToCheckAppointments);
+                List<Appointment> dayAppointments = SelectDayAppointments(dayToCheckAppointments); 
                 if (dayAppointments.Count != 0)
                 {
                     Label appointmentLabel = new Label()
@@ -524,8 +524,8 @@ namespace Proyecto_2_Software_Verificable
         private List<Appointment> SelectDayAppointments(DateTime day)
         {
             DateTime dayHourZero = day.Date;
-            DateTime nextDay = dayHourZero.AddDays(1);
-            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(dayHourZero, nextDay));
+            DateTime lastSecondOfDay = dayHourZero.AddDays(1).AddMilliseconds(-1);
+            List<Appointment> validAppointments = appointments.FindAll(a => a.isBetweenDates(dayHourZero, lastSecondOfDay));
             return validAppointments;
 
         }
